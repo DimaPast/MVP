@@ -1,0 +1,131 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+// Model
+class Person {
+public:
+    Person(const std::string& name, int age) : name(name), age(age) {}
+
+    std::string getName() const {
+        return name;
+    }
+
+    int getAge() const {
+        return age;
+    }
+
+private:
+    std::string name;
+    int age;
+};
+
+class Model {
+public:
+    void addPerson(const Person& person) {
+        people.push_back(person);
+    }
+
+    std::vector<Person> getAllPeople() const {
+        return people;
+    }
+
+private:
+    std::vector<Person> people;
+};
+
+// View
+class View {
+public:
+    void showData(const Person& person) {
+        std::cout << "View: Displaying data - Name: " << person.getName() << ", Age: " << person.getAge() << std::endl;
+    }
+
+    void showAllData(const std::vector<Person>& people) {
+        std::cout << "View: Displaying all data:" << std::endl;
+        for (const auto& person : people) {
+            showData(person);
+        }
+    }
+
+    Person getPersonInput() {
+        std::string name;
+        int age;
+
+        std::cout << "View: Enter name: ";
+        std::getline(std::cin, name);
+
+        std::cout << "View: Enter age: ";
+        std::cin >> age;
+        std::cin.ignore(); // Clear the newline character from the input buffer
+
+        return Person(name, age);
+    }
+};
+
+// Presenter
+class Presenter {
+public:
+    Presenter(Model& model, View& view) : model(model), view(view) {}
+
+    void updateView() {
+        view.showAllData(model.getAllPeople());
+    }
+
+    void processUserInput() {
+        char choice;
+        std::cout << "View: Choose an option (a - Add Person, s - Show All Data, q - Quit): ";
+        std::cin >> choice;
+        std::cin.ignore(); // Clear the newline character from the input buffer
+
+        switch (choice) {
+        case 'a':
+            addPerson();
+            break;
+        case 's':
+            updateView();
+            break;
+        case 'q':
+            // Quit
+            break;
+        default:
+            std::cout << "View: Invalid option. Try again." << std::endl;
+        }
+    }
+
+private:
+    void addPerson() {
+        Person newPerson = view.getPersonInput();
+        model.addPerson(newPerson);
+    }
+
+    Model& model;
+    View& view;
+};
+
+int main() {
+    // Create instances of Model, View, and Presenter
+    Model model;
+    View view;
+    Presenter presenter(model, view);
+
+    // Set initial data in the model
+    model.addPerson(Person("John Doe", 30));
+    model.addPerson(Person("Jane Smith", 25));
+
+    // Initial view update
+    presenter.updateView();
+
+    // User interaction loop
+    char choice;
+    do {
+        presenter.processUserInput();
+
+        std::cout << "Do you want to continue? (y/n): ";
+        std::cin >> choice;
+        std::cin.ignore(); // Clear the newline character from the input buffer
+
+    } while (choice == 'y' || choice == 'Y');
+
+    return 0;
+}
